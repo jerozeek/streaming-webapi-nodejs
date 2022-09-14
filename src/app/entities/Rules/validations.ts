@@ -6,6 +6,19 @@ const loginSchema = z.object({
     deviceId: z.string().optional(),
 })
 
+const fpasswordSchema = z.object({
+    email: z.string().trim().email('Invalid email address'),
+})
+
+const signupSchema = z.object({
+    name: z.string().trim(),
+    email: z.string().trim().email('Invalid email address'),
+    password: z.string().min(6,'Password must be at least 6 characters long'),
+    phone: z.string().min(11).max(14),
+})
+
 export = {
-    loginSchema
+    loginSchema,
+    signupSchema,
+    fpasswordSchema,
 }

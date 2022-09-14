@@ -1,8 +1,6 @@
 import {ErrorRequestHandler} from "express";
+import {KeyPatternErrorResponse} from "../helpers";
 
 export const errorHandler: ErrorRequestHandler = (err, req, res, next) => {
-    return res.status(400).json({
-        status: 400,
-        message: err
-    })
+   return KeyPatternErrorResponse(err, res)
 }
