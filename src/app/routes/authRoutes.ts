@@ -3,12 +3,13 @@ import {userFactory} from "../factories/userFactory";
 import {response} from "../helpers/resource";
 import {UserResource} from "../resource/UserResource";
 import {Cookies} from "../helpers/cookies";
+import {Auth} from "../midldlewares/auth";
 
 const serviceInstance = userFactory();
 
 const login = async (req: Request, res: Response) => {
 
-    const { password, deviceId } = req.body;
+    const { deviceId, password } = req.body;
 
    serviceInstance.login(password, deviceId).then(async (user) => {
 
@@ -26,7 +27,6 @@ const login = async (req: Request, res: Response) => {
            accessToken,
            refreshToken: user.deviceId === 'web' ? null : refreshToken
        })
-
    }).
    catch((e: Error) => {
       return response(res).error(e.message);
@@ -57,8 +57,17 @@ const forgetPassword = async (req: Request, res: Response) => {
    });
 }
 
+const verifyOtp = async (req: Request, res: Response) => {
+    serviceInstance.verifyOtp().then((result) => {
+        return response(res).success(200, 'Verification was successful', {email: Auth.user().email})
+    }).
+    catch(() => {
+        return response(res).error('Invalid OTP')
+    })
+}
+
 const logout = async (req: Request, res: Response) => {
 
 }
 
-export = { login, forgetPassword, signup, logout }
+export = { login, forgetPassword, signup, logout, verifyOtp }

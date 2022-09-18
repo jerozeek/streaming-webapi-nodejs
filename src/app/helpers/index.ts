@@ -72,9 +72,3 @@ export const hasExpiry = (actualTime: number) => {
 }
 
 export const now = moment().unix();
-
-// export const hashPassword = (password: string): string => {
-//     return bcrypt.hashSync(password, 10)
-// }
-//
-// export const verifyP

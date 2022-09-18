@@ -13,6 +13,8 @@ export class Auth {
 
     private static data: any;
 
+    public static otp: string;
+
     public static async userAuth(req: Request, res: Response, next: NextFunction) {
         const {email, id} = req.user.email;
         await Auth.currentUser(email);
@@ -45,6 +47,18 @@ export class Auth {
             const data = validations.signupSchema.parse(req.body);
             const reg = new RegisterEntity(data.name, data.email, data.phone, data.password, req.body.deviceId)
             Auth.data = reg.data();
+            next();
+        }
+        catch (e:any) {
+            throw_exception(e.message, res)
+        }
+    }
+
+    public static async otpVerification(req: Request, res: Response, next: NextFunction) {
+        try {
+            const data = validations.otpSchema.parse(req.body);
+            await Auth.currentUser(data.email);
+            Auth.otp    = data.otp;
             next();
         }
         catch (e:any) {

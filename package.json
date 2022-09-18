@@ -7,7 +7,7 @@
     "build": "rm -rf build/ && tsc",
     "dev": "nodemon src/app/server.ts",
     "start": "node ./build/server.js",
-    "test": "node --no-warnings --test src/tests"
+    "test": "PORT=9093 node --test"
   },
   "keywords": [],
   "author": "",

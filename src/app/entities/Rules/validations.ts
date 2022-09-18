@@ -10,6 +10,11 @@ const fpasswordSchema = z.object({
     email: z.string().trim().email('Invalid email address'),
 })
 
+const otpSchema = z.object({
+    email: z.string().trim().email('Invalid email address'),
+    otp: z.string().min(4).max(6),
+})
+
 const signupSchema = z.object({
     name: z.string().trim(),
     email: z.string().trim().email('Invalid email address'),
@@ -21,4 +26,5 @@ export = {
     loginSchema,
     signupSchema,
     fpasswordSchema,
+    otpSchema
 }

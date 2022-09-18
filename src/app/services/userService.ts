@@ -1,7 +1,7 @@
 import {serviceInterface} from './interfaces';
 import {UserProp, userRepositoryInterface} from "../repositories/interfaces";
 import {Auth} from "../midldlewares/auth";
-import {expiryTimeInMinutes, generateRandomNumber, KeyPatternErrorMessage} from "../helpers";
+import { KeyPatternErrorMessage } from "../helpers";
 import {Password} from "../helpers/password";
 import {Otp} from "../helpers/otp";
 
@@ -56,7 +56,7 @@ export class UserServices implements serviceInterface {
 
             const user = Auth.user();
 
-            await Otp.set(2, user.email)
+            await Otp.set(2, user.email, true)
 
             return resolve(user);
         })
@@ -68,6 +68,22 @@ export class UserServices implements serviceInterface {
 
     public async createRefreshToken(user:UserProp):Promise<string | null> {
         return await this.userRepository.generateRefreshToken(user);
+    }
+
+    public async verifyOtp(): Promise<boolean> {
+        return new Promise(async (resolve, reject) => {
+            if (Otp.compare()) {
+                await this.resetOtp(Auth.user().email, true);
+                return resolve(true)
+            }
+            return reject(false);
+        })
+    }
+
+    private async resetOtp(email: string, passwordReset: boolean = true): Promise<boolean> {
+        //update the otp...
+        await Otp.set(3, email, passwordReset)
+        return true
     }
 
 }

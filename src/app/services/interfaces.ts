@@ -6,4 +6,5 @@ export interface serviceInterface {
     signup: () => Promise<UserProp>
     createAccessToken: (user:UserProp) => Promise<string | null>
     createRefreshToken: (user:UserProp) => Promise<string | null>
+    verifyOtp: () => Promise<boolean>
 }

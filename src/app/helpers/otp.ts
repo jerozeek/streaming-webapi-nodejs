@@ -1,50 +1,62 @@
 import {expiryTimeInMinutes, generateRandomNumber, now} from "./index";
 import {userRepositoryInterface} from "../repositories/interfaces";
 import {UserRepository} from "../repositories/userRepository";
+import {Auth} from "../midldlewares/auth";
 
 
 export class Otp {
 
     static userRepository: userRepositoryInterface = new UserRepository();
 
-    static async set(type: number, email: string) {
+    private static otp: string;
+
+    private static expiry: number;
+
+    static async set(type: number, email: string, passwordReset: boolean = false) {
         switch (type) {
             case 1:
                 return Otp.accountActivation(email)
             case 2 :
                 return Otp.passwordReset(email)
+            case 3 :
+                return Otp.resetOtp(email, passwordReset)
         }
     }
 
-    static async accountActivation(email: string):Promise<boolean> {
+    static async resetOtp(email: string, passwordReset: boolean = false) {
+        Otp.create();
+        Otp.createExpiryTime()
         await Otp.userRepository.updateUserFields(email, {
-            otp: Otp.create(),
-            otpExpiry: Otp.createExpiryTime()
+            otp: Otp.otp,
+            passwordReset,
+            otpExpiry: Otp.expiry
         });
+    }
+
+    static async accountActivation(email: string):Promise<boolean> {
+        await Otp.resetOtp(email);
+        //send in an email
         return true;
     }
 
     static async passwordReset(email: string): Promise<boolean> {
-        await Otp.userRepository.updateUserFields(email, {
-            passwordReset: true,
-            otp: Otp.create(),
-            otpExpiry: Otp.createExpiryTime()
-        });
+        await Otp.resetOtp(email, true);
+        //send in an email
         return true;
     }
 
-    static create (): string {
-        return generateRandomNumber(4);
+    static create (): void {
+        Otp.otp = generateRandomNumber(4);
     }
 
-    static createExpiryTime (timeInMinute: number = 30) {
-        return expiryTimeInMinutes(timeInMinute);
+    static createExpiryTime (timeInMinute: number = 30):void {
+        Otp.expiry = expiryTimeInMinutes(timeInMinute);
     }
 
-    static compare(code: string, otp: string, expiryTime: string): boolean {
+    static compare(): boolean {
 
-        if (now > Number(expiryTime)) return false;
+        if (now > Number(Auth.user().otpExpiry)) return false;
 
-        return code === otp;
+        return Auth.user().otp === Auth.otp;
     }
 }

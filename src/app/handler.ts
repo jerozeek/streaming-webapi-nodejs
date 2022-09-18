@@ -16,13 +16,14 @@ export class Handler {
 
     static app: Application = express();
 
-    static server:  Server;
+    static server: Server = Handler.app.listen(process.env.PORT, () => console.log('server is connected'));
 
     static async startServer() {
 
         const uri = process.env.DB_CONNECTION || '';
         await mongoose.connect(uri);
-        Handler.server = Handler.app.listen(process.env.PORT, () => console.log('server is connected'))
+
+        await Handler.server;
 
         //connect to cloudinary
         cloudinary.config({
@@ -43,10 +44,9 @@ export class Handler {
 
         //use cors
         Handler.app.use(cors({
-            origin: 'http://localhost:3000',
+            origin: 'http://localhost:9093',
             credentials: true,
         }));
-
 
         //routes
         Handler.app.use(`${DEFAULT_PATH}`, routes)
