@@ -7,4 +7,5 @@ export interface serviceInterface {
     createAccessToken: (user:UserProp) => Promise<string | null>
     createRefreshToken: (user:UserProp) => Promise<string | null>
     verifyOtp: () => Promise<boolean>
+    resetPassword: (password: string) => Promise<void>
 }

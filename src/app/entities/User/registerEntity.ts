@@ -1,4 +1,3 @@
-import bcrypt from 'bcrypt';
 import {Password} from "../../helpers/password";
 
 

@@ -3,7 +3,6 @@ import {throw_exception} from "../utils/exceptions";
 import Stripe from "stripe";
 import {ZodError} from "zod";
 import { Response } from 'express';
-import bcrypt from "bcrypt";
 
 export const KeyPatternErrorResponse = (e: any, res: Response) => {
     const errorMessage = KeyPatternErrorMessage(e);
@@ -18,7 +17,7 @@ export const KeyPatternErrorMessage =(e: any) => {
     {
         for (let key in errorReceived)
         {
-            errorMessage = `${key} already exists. `;
+            errorMessage = `${key} already exists.`;
         }
     }
     else

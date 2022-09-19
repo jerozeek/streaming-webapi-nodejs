@@ -2,7 +2,7 @@ import {expiryTimeInMinutes, generateRandomNumber, now} from "./index";
 import {userRepositoryInterface} from "../repositories/interfaces";
 import {UserRepository} from "../repositories/userRepository";
 import {Auth} from "../midldlewares/auth";
-
+import {emailSubscriber} from "../events/Observers/Notification/Subscribers/EmailSubscriber";
 
 export class Otp {
 
@@ -36,12 +36,14 @@ export class Otp {
     static async accountActivation(email: string):Promise<boolean> {
         await Otp.resetOtp(email);
         //send in an email
+        emailSubscriber(email, 'Password Reset','activation', {otp: Otp.otp})
         return true;
     }
 
     static async passwordReset(email: string): Promise<boolean> {
         await Otp.resetOtp(email, true);
         //send in an email
+        emailSubscriber(email, 'Password Reset','password_reset', {otp: Otp.otp})
         return true;
     }
 

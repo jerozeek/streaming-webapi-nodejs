@@ -66,8 +66,19 @@ const verifyOtp = async (req: Request, res: Response) => {
     })
 }
 
-const logout = async (req: Request, res: Response) => {
-
+const resetPassword = async (req: Request, res: Response) => {
+    serviceInstance.resetPassword(req.body.password).then(() => {
+        return response(res).success(200, 'Password updated successfully')
+    }).
+    catch((e:Error) => {
+        return response(res).error(e.message);
+    });
 }
 
-export = { login, forgetPassword, signup, logout, verifyOtp }
+const logout = async (req: Request, res: Response) => {
+    return res.status(200).json({
+        status: true
+    })
+}
+
+export = { login, forgetPassword, signup, logout, verifyOtp, resetPassword }

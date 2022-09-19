@@ -80,10 +80,19 @@ export class UserServices implements serviceInterface {
         })
     }
 
+    public resetPassword(password: string): Promise<void> {
+        return new Promise(async (resolve, reject) => {
+            const user = Auth.user();
+            await this.userRepository.updateUserFields(user.email, {password: Password.hash(password)})
+            return resolve();
+        })
+    }
+
     private async resetOtp(email: string, passwordReset: boolean = true): Promise<boolean> {
         //update the otp...
         await Otp.set(3, email, passwordReset)
         return true
     }
+
 
 }

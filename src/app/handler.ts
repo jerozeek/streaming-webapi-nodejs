@@ -1,6 +1,6 @@
 import express, {Application, Request, Response, NextFunction} from "express";
 import {Server} from "http";
-import mongoose from "mongoose";
+import { mongoose} from '@typegoose/typegoose';
 import fileUploader from "express-fileupload";
 import { v2 as cloudinary } from 'cloudinary'
 import routes from './routes';
@@ -10,17 +10,27 @@ import {DEFAULT_PATH} from "./utils/util";
 import { config } from "dotenv";
 import cors from "cors";
 import {logger} from "./events/Logger";
+import { MongoMemoryServer } from 'mongodb-memory-server';
 config();
+
+let mongo: any = null;
 
 export class Handler {
 
     static app: Application = express();
 
-    static server: Server = Handler.app.listen(process.env.PORT, () => console.log('server is connected'));
+    static server: Server = Handler.app.listen(process.env.PORT, () => console.log('server is connected to port: '+ process.env.PORT));
 
     static async startServer() {
 
-        const uri = process.env.DB_CONNECTION || '';
+        let uri     = process.env.DB_CONNECTION || '';
+        if (process.env.NODE_ENV === 'test')
+        {
+            mongo = await MongoMemoryServer.create();
+            uri = mongo.getUri();
+        }
+
+        //make the connection!!!
         await mongoose.connect(uri);
 
         await Handler.server;
@@ -67,7 +77,29 @@ export class Handler {
     }
 
     static async closeServer() {
-        await Handler.server.close(() => console.log('server has close'))
+        await Handler.server.close();
+        await mongoose.disconnect();
+    }
+
+    static async dropMongoDB() {
+        if (process.env.NODE_ENV === 'test'){
+            if (mongo !== null) {
+                await mongoose.connection.dropDatabase()
+                await mongoose.connection.close()
+                await mongo.stop();
+            }
+        }
+    }
+
+    static async dropCollections() {
+        if (process.env.NODE_ENV === 'test') {
+            if (mongo !== null) {
+                const collections = await mongoose.connection.db.collections();
+                for(let collection of collections) {
+                    await mongoose.connection.db.dropCollection(collection.collectionName)
+                }
+            }
+        }
     }
 
 }

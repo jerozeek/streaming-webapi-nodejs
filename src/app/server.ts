@@ -1,3 +1,3 @@
 import { Handler } from "./handler";
 
-Handler.startServer();
+Handler.startServer().then((r) => console.log('ok'))

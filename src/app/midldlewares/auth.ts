@@ -42,6 +42,23 @@ export class Auth {
         }
     }
 
+    public static async resetPassword(req:Request, res: Response, next: NextFunction) {
+        try{
+            const data = validations.passwordResetSchema.parse(req.body);
+
+            await Auth.currentUser(data.email)
+
+            if (data.password !== data.confirmPassword) throw new Error('Confirm password do not match password')
+
+            if (!Auth.userData.passwordReset) throw new Error('You cannot update password at this time')
+
+            next();
+        }
+        catch (e: any) {
+            throw_exception(e.message, res)
+        }
+    }
+
     public static async signup(req: Request, res: Response, next: NextFunction) {
         try {
             const data = validations.signupSchema.parse(req.body);
