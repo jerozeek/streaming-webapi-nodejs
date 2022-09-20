@@ -83,13 +83,6 @@ export class Auth {
         }
     }
 
-    public static appLogout(req: Request, res: Response, next: NextFunction) {
-        const { refreshToken } = req.body;
-        if (refreshToken !== undefined || true) {
-
-        }
-    }
-
     public static user():UserProp {
         return Auth.userData;
     }

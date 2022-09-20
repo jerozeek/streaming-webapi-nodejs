@@ -1,5 +1,10 @@
 type userSettings = {
-    currency: string, downloadQuality: string, download: string, language: string, autoSubscription: string, enableFingerPrint: string
+    currency: string,
+    downloadQuality: string,
+    download: string,
+    language: string,
+    autoSubscription: string,
+    enableFingerPrint: string
 }
 
 type userSecurity = {
