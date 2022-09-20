@@ -15,7 +15,16 @@ Access the live version of the application [**live application**](https://bit.ly
       - [x] Forget Password
       - [x] OTP Verification
       - [x] Reset Password
-      - TODO
-        - [x] Authentication Unit Test using jest
+      - [x] Regenerate Access Token
+      - [x] Mobile and Web Logout
+    
+  - TODO
+  - [ ] Add the following Social Auth manager using strategy design pattern
+  - [ ] FaceBook
+  - [ ] Google
+  - [ ] Github
+  
+    - TEST
+      - [x] Authentication Unit Test using jest
 
 ## Have fun!
