@@ -18,14 +18,15 @@ export class ResponseFactory {
         this.user = user;
     }
 
-    public async send() {
-        switch (this.user.status) {
-
+    public send(type: string)
+    {
+        switch (this.user.status)
+        {
             case 'pending' :
                 return this.pending()
 
             case 'active' :
-                return this.active()
+                return this.active(type)
 
             case 'disabled' :
                 return this.disabled()
@@ -42,14 +43,14 @@ export class ResponseFactory {
         response(this.res).error('Account have been disabled. Please contact support');
     }
 
-    private async active()
+    private async active(type: string)
     {
         const accessToken  = await serviceInstance.createAccessToken(this.user);
         const refreshToken = await serviceInstance.createRefreshToken(this.user);
 
         if (this.user.deviceId === 'web') Cookies.set(this.res, refreshToken);
 
-        return response(this.res).success(200, 'Account created successfully', {
+        return response(this.res).success(200, type === 'login' ? 'Login was successful' : 'Account created successfully', {
             user: new UserResource(this.user).all(),
             accessToken,
             refreshToken: this.user.deviceId === 'web' ? null : refreshToken

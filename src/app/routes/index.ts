@@ -13,5 +13,7 @@ route.post('/auth/verify-otp', [Auth.otpVerification, throttle()], use(authRoute
 route.post('/auth/reset-password', [Auth.resetPassword, throttle()], use(authRoute.resetPassword))
 route.post('/auth/logout', [throttle()], use(authRoute.logout))
 route.get('/auth/logout', [throttle()], use(authRoute.logout))
+route.get('/auth/revalidate-token/:channel', [throttle()], use(authRoute.revalidateToken))
+route.post('/auth/revalidate-token/:channel', [throttle()], use(authRoute.revalidateToken))
 
 export = route;

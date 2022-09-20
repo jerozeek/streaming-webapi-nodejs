@@ -1,9 +1,12 @@
-import {serviceInterface} from './interfaces';
+import {reAuthType, serviceInterface} from './interfaces';
 import {UserProp, userRepositoryInterface} from "../repositories/interfaces";
 import {Auth} from "../midldlewares/auth";
 import { KeyPatternErrorMessage } from "../helpers";
 import {Password} from "../helpers/password";
 import {Otp} from "../helpers/otp";
+import jwt from "jsonwebtoken";
+import {Cookies} from "../helpers/cookies";
+import { Response } from 'express';
 
 export class UserServices implements serviceInterface {
 
@@ -94,5 +97,58 @@ export class UserServices implements serviceInterface {
         return true
     }
 
+    public logout(refreshToken: string, isWeb: boolean, res: Response): Promise<void> {
+
+        return new Promise<void>(async (resolve, reject) => {
+
+            const secret = process.env.REFRESH_TOKEN_SECRET || '';
+
+            const userValidatedData = <any>jwt.verify(refreshToken, secret);
+
+            if (!userValidatedData) return reject({message: 'Invalid credentials'})
+
+            const user = await this.userRepository.getUserByEmail(userValidatedData.email)
+
+            if (!user) throw new Error('Invalid email address')
+
+            const existingRefreshToken: any | [] = user.security.tokens;
+
+            if (existingRefreshToken.length > 0) {
+                await this.userRepository.removeRefreshToken(user.email, refreshToken);
+            }
+
+            if (isWeb) {
+                Cookies.remove(res);
+            }
+        })
+    }
+
+    public revalidateUser(refreshToken: string): Promise<reAuthType> {
+
+        return new Promise(async (resolve, reject) => {
+
+            const decoded = <any> jwt.verify(refreshToken, process.env.REFRESH_TOKEN_SECRET || "");
+
+            if (!decoded) return reject({message: 'Invalid token'})
+
+            const user = await this.userRepository.getUserByEmail(decoded.email)
+
+            if (!user) return reject({message: 'Unauthorized account'})
+
+            if (refreshToken)
+            {
+                const existingRefreshToken : any[] = user.security.tokens;
+
+                if (existingRefreshToken.some(token => token.refreshToken === refreshToken)) {
+                    const accessToken = await this.userRepository.generateAccessToken(user);
+                    return resolve({
+                        accessToken,
+                        user
+                    })
+                }
+            }
+            throw new Error('No refresh token found')
+        })
+    }
 
 }

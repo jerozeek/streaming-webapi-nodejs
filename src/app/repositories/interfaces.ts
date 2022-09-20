@@ -46,4 +46,5 @@ export interface userRepositoryInterface {
     generateRefreshToken: (user: UserProp) => Promise<string | null>
     createLogin: (email: string, deviceId: string) => Promise<UserProp>
     updateUserFields: (email: string, data: object) => Promise<UserProp>
+    removeRefreshToken: (email: string, refreshToken: string) => Promise<void>
 }

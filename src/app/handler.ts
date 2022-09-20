@@ -11,6 +11,7 @@ import { config } from "dotenv";
 import cors from "cors";
 import {logger} from "./events/Logger";
 import { MongoMemoryServer } from 'mongodb-memory-server';
+import {allowedCors} from "./config/allowedCors";
 config();
 
 let mongo: any = null;
@@ -53,10 +54,7 @@ export class Handler {
         }));
 
         //use cors
-        Handler.app.use(cors({
-            origin: 'http://localhost:9093',
-            credentials: true,
-        }));
+        Handler.app.use(cors(allowedCors));
 
         //routes
         Handler.app.use(`${DEFAULT_PATH}`, routes)

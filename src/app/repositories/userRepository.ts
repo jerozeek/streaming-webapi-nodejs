@@ -55,4 +55,8 @@ export class UserRepository implements userRepositoryInterface {
         return await UsersSchema.findOneAndUpdate({email}, {$set: data}, {new: true}) as UserProp;
     }
 
+    public async removeRefreshToken(email: string, refreshToken: string): Promise<void> {
+        await UsersSchema.updateOne({email}, {$pull: {"security.tokens": {refreshToken}}});
+    }
+
 }
