@@ -1,9 +1,9 @@
 import { Request, Response } from 'express';
 import {userFactory} from "../factories/userFactory";
 import {response} from "../helpers/resource";
-import {UserResource} from "../resource/UserResource";
-import {Cookies} from "../helpers/cookies";
 import {Auth} from "../midldlewares/auth";
+import {ResponseFactory} from "../core/responseCore/responseFactory";
+import {KeyPatternErrorMessage} from "../helpers";
 
 const serviceInstance = userFactory();
 
@@ -12,21 +12,7 @@ const login = async (req: Request, res: Response) => {
     const { deviceId, password } = req.body;
 
    serviceInstance.login(password, deviceId).then(async (user) => {
-
-       if (user.status === 'pending') {
-           return response(res).success(200, 'An OTP have been sent to your email.', {email: user.email})
-       }
-
-       const accessToken    = await serviceInstance.createAccessToken(user);
-       const refreshToken   = await serviceInstance.createRefreshToken(user);
-
-       if (user.deviceId === 'web') Cookies.set(res, refreshToken);
-
-       return response(res).success(200, 'Login was successful', {
-           user: new UserResource(user).all(),
-           accessToken,
-           refreshToken: user.deviceId === 'web' ? null : refreshToken
-       })
+       return new ResponseFactory(res, user).send();
    }).
    catch((e: Error) => {
       return response(res).error(e.message);
@@ -35,16 +21,11 @@ const login = async (req: Request, res: Response) => {
 
 const signup = async (req: Request, res: Response) => {
 
-    const user          = await serviceInstance.signup();
-    const accessToken   = await serviceInstance.createAccessToken(user);
-    const refreshToken  = await serviceInstance.createRefreshToken(user);
-
-    if (user.deviceId === 'web') Cookies.set(res, refreshToken);
-
-    return response(res).success(200, 'Account created successfully', {
-        user: new UserResource(user).all(),
-        accessToken,
-        refreshToken: user.deviceId === 'web' ? null : refreshToken
+    serviceInstance.signup().then((user) => {
+        return new ResponseFactory(res, user).send();
+    }).
+    catch((e:any) => {
+        return response(res).error(KeyPatternErrorMessage(e))
     })
 }
 
@@ -58,7 +39,7 @@ const forgetPassword = async (req: Request, res: Response) => {
 }
 
 const verifyOtp = async (req: Request, res: Response) => {
-    serviceInstance.verifyOtp().then((result) => {
+    serviceInstance.verifyOtp().then(() => {
         return response(res).success(200, 'Verification was successful', {email: Auth.user().email})
     }).
     catch(() => {

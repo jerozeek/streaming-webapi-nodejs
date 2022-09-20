@@ -4,7 +4,17 @@ import {Handler} from "../../handler";
 import {loginData, resetPasswordCredentials, signupData} from "../mocks/mock";
 import {DEFAULT_PATH} from "../../utils/util";
 import {UserRepository} from "../../repositories/userRepository";
+import {emailSubscriber} from "../../events/Observers/Notification/Subscribers/EmailSubscriber";
+import sinon from 'sinon';
 
+const userRepository = new UserRepository();
+
+
+const repositorySpy = sinon.spy();
+repositorySpy(userRepository.create);
+
+const emailSpy = sinon.spy();
+emailSpy(emailSubscriber)
 
 beforeAll(() => {
     return Handler.startServer();
@@ -18,8 +28,6 @@ afterAll( async () => {
     await Handler.dropMongoDB();
     return Handler.closeServer();
 })
-
-const userRepository = new UserRepository();
 
 describe('Authentication suite', () => {
 
@@ -41,20 +49,22 @@ describe('Authentication suite', () => {
 
         it('return 200 if signup is valid', async () => {
             const res = await mockPostRequest('auth/register', signupData);
-            expect(res.body.message).toEqual('Account created successfully')
+            expect(res.body.message).toEqual('An OTP have been sent to your email.')
             expect(res.statusCode).toBe(200)
+            expect(repositorySpy).toHaveBeenCalled()
+            expect(emailSpy).toHaveBeenCalled()
         })
 
         it('return duplicate email', async () => {
             const res = await mockPostRequest('auth/register', signupData);
             expect(res.body.message).toEqual('email already exists.')
-            expect(res.statusCode).toBe(500)
+            expect(res.statusCode).toBe(400)
         })
 
         it('return duplicate phone', async () => {
             const res = await mockPostRequest('auth/register', {...signupData, email: "tester@gmail.com"});
             expect(res.body.message).toEqual('phone already exists.')
-            expect(res.statusCode).toBe(500)
+            expect(res.statusCode).toBe(400)
         })
     })
 
@@ -98,8 +108,8 @@ describe('Authentication suite', () => {
             expect(res.statusCode).toEqual(200)
             expect(res.body.message).toStrictEqual("An OTP have been sent to your email")
             expect(res.body.data).toEqual({email: loginData.email})
+            //expect(spy).toHaveBeenCalled()
         })
-
     })
 
     describe("Update Password route test suite", () => {
