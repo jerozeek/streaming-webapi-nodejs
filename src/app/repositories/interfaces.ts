@@ -31,7 +31,8 @@ export interface UserProp {
     security: userSecurity;
     settings: userSettings;
     myList?: userMovieList;
-    lastLogin: string
+    lastLogin: string;
+    socialAuth: string | null;
 }
 
 

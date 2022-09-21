@@ -15,9 +15,11 @@ export class Auth {
 
     public static otp: string;
 
-    public static async userAuth(req: Request, res: Response, next: NextFunction) {
-        const {email, id} = req.user.email;
+    public static verifyType: string;
+
+    public static async userAuth(email: string, req: Request, res: Response, next: NextFunction) {
         await Auth.currentUser(email);
+        next();
     }
 
     public static async login(req:Request, res: Response, next: NextFunction) {
@@ -75,6 +77,7 @@ export class Auth {
         try {
             const data = validations.otpSchema.parse(req.body);
             await Auth.currentUser(data.email);
+            Auth.verifyType = data.type;
             Auth.otp    = data.otp;
             next();
         }

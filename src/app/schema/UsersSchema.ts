@@ -54,6 +54,9 @@ class Users extends TimeStamps {
 
     @prop({ type: String, default: new Date() })
     lastLogin: string
+
+    @prop({ type: String, default: null })
+    socialAuth: string
 }
 
 const UsersSchema = getModelForClass(Users);

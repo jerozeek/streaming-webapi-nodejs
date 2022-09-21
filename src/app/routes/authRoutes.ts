@@ -42,8 +42,13 @@ const forgetPassword = async (req: Request, res: Response) => {
 }
 
 const verifyOtp = async (req: Request, res: Response) => {
-    serviceInstance.verifyOtp().then(() => {
-        return response(res).success(200, 'Verification was successful', {email: Auth.user().email})
+
+    serviceInstance.verifyOtp().then((result) => {
+
+        if (typeof result === "boolean")  return response(res).success(200, 'Verification was successful', {email: Auth.user().email})
+
+        //log the user in if its account verification request
+        return new ResponseFactory(res, result).send('login');
     }).
     catch(() => {
         return response(res).error('Invalid OTP')

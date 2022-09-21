@@ -36,11 +36,11 @@ export class ResponseFactory {
 
     private async pending() {
         await Otp.set(1, this.user.email);
-        response(this.res).success(200, 'An OTP have been sent to your email.', {email: this.user.email})
+        return response(this.res).success(200, 'An OTP have been sent to your email.', {email: this.user.email})
     }
 
     private async disabled() {
-        response(this.res).error('Account have been disabled. Please contact support');
+        return response(this.res).error('Account have been disabled. Please contact support');
     }
 
     private async active(type: string)

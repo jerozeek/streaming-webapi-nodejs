@@ -1,9 +1,12 @@
 import jwt from 'jsonwebtoken';
 import { Request, Response, NextFunction } from 'express';
+import {Auth} from "./auth";
 
 export const verifyToken = async (req:Request, res: Response, next: NextFunction) => {
+
     try{
         let token = req.header('Authorization');
+
         if (token)
         {
             const accessToken: string = token.split(' ')[1];
@@ -12,9 +15,10 @@ export const verifyToken = async (req:Request, res: Response, next: NextFunction
 
                 req.user = <unknown>jwt.verify(accessToken, secret);
 
-                next();
+                return Auth.userAuth(req.user.email, req, res, next);
             }
             catch (e) {
+                console.log(e);
                 return res.status(403).json({
                     status: 403,
                     message: 'Invalid Authorization token',

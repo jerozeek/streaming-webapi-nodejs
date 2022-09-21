@@ -1,4 +1,4 @@
-import {reAuthType, serviceInterface} from './interfaces';
+import {FileProps, reAuthType, serviceInterface} from './interfaces';
 import {UserProp, userRepositoryInterface} from "../repositories/interfaces";
 import {Auth} from "../midldlewares/auth";
 import { KeyPatternErrorMessage } from "../helpers";
@@ -7,6 +7,7 @@ import {Otp} from "../helpers/otp";
 import jwt from "jsonwebtoken";
 import {Cookies} from "../helpers/cookies";
 import { Response } from 'express';
+import {fileUploader} from "../helpers/fileUploader";
 
 export class UserServices implements serviceInterface {
 
@@ -26,8 +27,6 @@ export class UserServices implements serviceInterface {
             {
                 const newUserObject = await this.userRepository.createLogin(user.email, deviceId);
 
-                if (user.status === 'pending') await Otp.set(1, user.email)
-
                 return resolve(newUserObject)
             }
 
@@ -38,13 +37,8 @@ export class UserServices implements serviceInterface {
     public signup(): Promise<UserProp> {
 
         return new Promise(async (resolve, reject) => {
-
             const payload       = Auth.signupData();
-
             await this.userRepository.create(payload).then(async (result) => {
-
-                await Otp.set(1, payload.email)
-
                 return resolve(result);
             }).
             catch((e: Error) => {
@@ -73,10 +67,19 @@ export class UserServices implements serviceInterface {
         return await this.userRepository.generateRefreshToken(user);
     }
 
-    public async verifyOtp(): Promise<boolean> {
+    public async verifyOtp(): Promise<UserProp | boolean> {
+
         return new Promise(async (resolve, reject) => {
-            if (Otp.compare()) {
-                await this.resetOtp(Auth.user().email, true);
+            if (Otp.compare())
+            {
+                await this.resetOtp(Auth.user().email, Auth.verifyType === 'passwordReset');
+
+                //set status of account to active after confirmation
+                if (Auth.verifyType !== 'passwordReset'){
+                    const userProp = await this.userRepository.updateUserFields(Auth.user().email, {status: 'active'})
+                    return resolve(userProp);
+                }
+
                 return resolve(true)
             }
             return reject(false);
@@ -148,6 +151,16 @@ export class UserServices implements serviceInterface {
                 }
             }
             throw new Error('No refresh token found')
+        })
+    }
+
+    public uploadImage(file: FileProps):Promise<string> {
+        return new Promise(async (resolve, reject) => {
+            await fileUploader(file, 'user', async (error: unknown, uri: string) => {
+                if (error) return reject({message: error});
+                await this.userRepository.updateUserFields(Auth.user().email, {image: uri})
+                return resolve(uri);
+            })
         })
     }
 

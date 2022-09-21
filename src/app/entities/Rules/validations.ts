@@ -13,6 +13,7 @@ const fpasswordSchema = z.object({
 const otpSchema = z.object({
     email: z.string().trim().email('Invalid email address'),
     otp: z.string().min(4).max(6),
+    type: z.string().trim() //Allowed: [accountVerification, passwordReset]
 })
 
 const passwordResetSchema = z.object({

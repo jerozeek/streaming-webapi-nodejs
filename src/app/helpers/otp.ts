@@ -26,7 +26,7 @@ export class Otp {
     static async resetOtp(email: string, passwordReset: boolean = false) {
         Otp.create();
         Otp.createExpiryTime()
-        await Otp.userRepository.updateUserFields(email, {
+        return Otp.userRepository.updateUserFields(email, {
             otp: Otp.otp,
             passwordReset,
             otpExpiry: Otp.expiry
